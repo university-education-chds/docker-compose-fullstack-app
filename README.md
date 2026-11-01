@@ -1,12 +1,12 @@
-# Fullstack-приложение в Docker
+# Список дел в Docker
 
-Учебный проект для практического занятия №2 "Docker и Docker Compose" по дисциплине "Введение в девопс". Небольшое приложение: Go-бэкенд возвращает статичный фронтенд и отдаёт записи из PostgreSQL в ручке `api/items`. Весь стек поднимается одной командой через Docker Compose.
+Учебный проект для практического занятия №2 "Docker и Docker Compose" по дисциплине "Введение в девопс". Простое приложение "Список дел": можно добавлять задачи, отмечать их выполненными и удалять. Бэкенд на Go хранит задачи в PostgreSQL и раздаёт статичный фронтенд. Весь стек поднимается одной командой через Docker Compose.
 
 ## Состав
 
-- **app** - бэкенд на Go (`backend/`). Возвращает статичную страницу `frontend/` и отдаёт `GET /api/items`.
-- **db** - PostgreSQL 16 (`postgres:16-alpine`). При первом старте выполняет `init/01_seed.sql`.
-- **frontend** - HTML, CSS и JS без сборки (`frontend/`). Запрашивает `/api/items` и показывает список записей.
+- **app** - бэкенд на Go (`backend/`). Возвращает статичную страницу `frontend/` и предоставляет REST API `/api/items`.
+- **db** - PostgreSQL 16 (`postgres:16-alpine`). При первом старте выполняет `init/01_seed.sql` и создаёт таблицу с тремя начальными задачами.
+- **frontend** - HTML, CSS и JS без сборки (`frontend/`). Форма добавления, список задач с чекбоксами и кнопки удаления.
 
 ## Структура
 
@@ -31,22 +31,31 @@
 
 ## Запуск
 
-Нужны Docker и Docker Compose. Создаем и заполняем `.env` по примеру из `.env.example`, после чего запускаем compose.
+Нужны Docker и Docker Compose. Создайте `.env` по примеру из `.env.example` и запустите compose.
 
 ```bash
 cp .env.example .env
 docker compose up -d --build
 ```
 
-После старта:
+После старта приложение доступно на http://localhost:8080.
 
-- страница: http://localhost:8080
-- API: http://localhost:8080/api/items
+## API
 
-Пример ответа API:
+| Метод    | Путь              | Что делает                              |
+|----------|-------------------|-----------------------------------------|
+| `GET`    | `/api/items`      | список задач                            |
+| `POST`   | `/api/items`      | добавить задачу, тело `{"name": "..."}` |
+| `PATCH`  | `/api/items/{id}` | переключить статус "выполнено"          |
+| `DELETE` | `/api/items/{id}` | удалить задачу                          |
 
-```json
-[{"id":1,"name":"first item"},{"id":2,"name":"second item"}]
+Примеры:
+
+```bash
+curl -s http://localhost:8080/api/items
+curl -s -X POST -H "Content-Type: application/json" -d '{"name":"Купить молоко"}' http://localhost:8080/api/items
+curl -s -X PATCH http://localhost:8080/api/items/1
+curl -s -X DELETE http://localhost:8080/api/items/1
 ```
 
 ## Настройки
@@ -59,7 +68,7 @@ docker compose up -d --build
 | `DB_PASSWORD` | `secret`              |
 | `DB_NAME`     | `appdb`               |
 
-Пароль записывается в том БД при первой инициализации. Если потребуется изменить его позже, пересоздайте том сбросив volumes: `docker compose down -v`.
+Пароль и схема таблицы записываются в том БД при первой инициализации. Если изменить пароль или `init/01_seed.sql` позже, пересоздайте том: `docker compose down -v`.
 
 ## Особенности реализации
 

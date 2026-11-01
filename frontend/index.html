@@ -3,15 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Items</title>
+  <title>Список дел</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main>
-    <h1>Записи из базы данных</h1>
+    <h1>Список дел</h1>
+    <form id="form">
+      <input id="name" type="text" maxlength="200" placeholder="Что нужно сделать?" aria-label="Новая задача" required>
+      <button type="submit">Добавить</button>
+    </form>
     <p id="status" role="status">Загружаю…</p>
     <ul id="items"></ul>
-    <button id="reload" type="button">Обновить</button>
   </main>
   <script src="app.js"></script>
 </body>
